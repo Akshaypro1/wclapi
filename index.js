@@ -457,7 +457,13 @@ app.put('/updatefrontlorry', async (req, res) => {
     const transporterid = req.body.transporterid;
     let { LRatfactory } = req.body;
     let connection;
-
+    let base64String = LRatfactory;
+    if(base64String.includes(",")) 
+    {
+      base64String = base64String.split(',')[1]; // Extract only the Base64 part
+    }
+  
+    const fileData = Buffer.from(base64String, 'base64');
     try {
       connection = await database.pool.getConnection();
       const sql = `
@@ -466,7 +472,7 @@ app.put('/updatefrontlorry', async (req, res) => {
         WHERE orderid=? AND temp_truckno=? AND transporterid = ?
       `;
 
-      const [result] = await connection.execute(sql, [LRatfactory, orderid, temp_truckno, transporterid]);
+      const [result] = await connection.execute(sql, [fileData, orderid, temp_truckno, transporterid]);
 
       if (result.affectedRows > 0) {
         return res.json({ success: true, data: 'LR at factory updated successfully' });
